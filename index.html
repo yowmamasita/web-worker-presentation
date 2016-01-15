@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=1024, user-scalable=no">
 
-  <title>Your deck.js Presentation</title>
+  <title>Web Workers & ParallelJS</title>
 
   <!-- Required stylesheet -->
   <link rel="stylesheet" media="screen" href="core/deck.core.css">
@@ -36,18 +36,86 @@
 <!-- Begin slides. Just make elements with a class of slide. -->
 
 <section class="slide">
-# Title
+# ParallelJS
 </section>
 
 <section class="slide">
-## Topic 1
+## What? Why?
 
-* Hello, World!
+JavaScript is executed in a single thread mediated by an event loop, and the only way to write concurrent programs was through callbacks
+
+There are no cross-threading exceptions, race-conditions, or other problems associated with threads
+
+You're stuck with not taking full advantage of your CPU's power
+
+### Web Worker
+
+Allows us to create functions that feature long runtime and require high-computational effort
+
+Worker instances may be used simultaneously giving us the possibility to spawn as many of these workers as we desire
+</section>
+
+<section class="slide">
+## Communication
+
+Any code written for the worker should be treated as a concurrently running task
+
+Communication is performed via the `Messages API`
+
+    window.addEventListener('message', function (event) {
+      event.source.postMessage('Howdy Cowboy!', event.origin);
+    }, false);
 
 
-    function go() {
-      alert("Hello, 世界");
+</section>
+
+<section class="slide">
+## Communication p.2
+
+The only way to communicate between web workers is over the main application
+
+This means: your code is still race-condition free!
+
+### Example
+
+    var w = new Worker('prime.js');
+    w.onmessage = function(event) {
+      console.log(event);
+    };
+    var args = { start : 100, end : 10000 };
+    w.postMessage(JSON.stringify(args));
+</section>
+
+<section class="slide">
+## Communication p.3
+
+    onmessage = function (event) {
+      var arguments = JSON.parse(event.data);
+      run(arguments.start, arguments.end);
+    };
+
+    function run (start, end) {
+      var n = start;
+
+      while (n < end) {
+        var k = Math.sqrt(n);
+        var found = false;
+
+        for (var i = 2; !found && i <= k; ++i) {
+          found = n % i === 0;
+        }
+
+        if (!found) {
+          postMessage(n.toString());
+        }
+
+        n++;
+      }
     }
+</section>
+
+<section class="slide">
+## ParallelJS
 </section>
 
 <section class="slide">
