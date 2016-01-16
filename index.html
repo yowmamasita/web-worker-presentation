@@ -189,6 +189,48 @@ This will spawn one worker for each array element in the data, or the supplied `
 </section>
 
 <section class="slide">
+## Parallel.js p.5
+
+`require` is used to share state between your workers. `require` can be used to import libraries and functions into your worker threads.
+
+    p.require('http://mydomain.com/js/script.js')
+    p.require('js/script.js')
+    p = new Parallel([2, 3, 3], { evalPath: 'js/eval.js' });
+
+---
+
+    var wontWork = function (n) { return n * n; };
+    var r = new Parallel(3).require(wontWork).spawn(function (a) { return 2 * wontWork(a); }, 3);
+
+    function worksGreat(n) { return n * n }
+    var r = new Parallel(3).require(worksGreat).spawn(function (a) { return 2 * worksGreat(a); }, 3);
+
+    var r = new Parallel(3).require({ fn: wontWork, name: 'wontWork' }).spawn(function (a) { return 2 * wontWork(a); }, 3);
+</section>
+
+<section class="slide">
+## Parallel.js p.6
+
+You can pass data to threads that will be global to that worker. This data will be global in each called function.
+
+
+    var p = new Parallel([1, 2, 3], { env: { a: 10 } });
+
+    p.map(function (d) {
+      return d * global.env.a;
+    });
+
+You can also put a namespace like this
+
+
+    p = new Parallel([1, 2, 3], { env: { a: 10 }, envNamespace: 'hello' });
+
+    p.map(function (d) {
+      return d * global.hello.a;
+    });
+</section>
+
+<section class="slide">
 # Thank You!
 </section>
 
