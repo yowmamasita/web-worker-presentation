@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=1024, user-scalable=no">
 
-  <title>Web Workers & ParallelJS</title>
+  <title>Web Workers & Parallel.js</title>
 
   <!-- Required stylesheet -->
   <link rel="stylesheet" media="screen" href="core/deck.core.css">
@@ -36,7 +36,7 @@
 <!-- Begin slides. Just make elements with a class of slide. -->
 
 <section class="slide">
-# ParallelJS
+# Parallel.js
 </section>
 
 <section class="slide">
@@ -115,7 +115,77 @@ This means: your code is still race-condition free!
 </section>
 
 <section class="slide">
-## ParallelJS
+## Parallel.js
+
+A library for multi-core processing in Javascript
+
+Very lightweight, only 1490 bytes when minified and gzipped
+
+
+    var p = new Parallel([1, 2, 3, 4, 5]);
+    console.log(p.data);
+
+
+Objects returned by the `Parallel` constructor is meant to be chained, so you can produce a chain of operations on the provided data
+
+By default, it falls back to synchronous processing using `setTimeout`
+
+
+    var p = new Parallel([1, 2, 3, 4, 5], { maxWorkers: 2 });
+</section>
+
+<section class="slide">
+## Parallel.js p.2
+
+JSFiddle [https://goo.gl/kp3L5z](https://goo.gl/kp3L5z)
+
+
+    p.spawn(function (data) {
+      return data.map(function (number) {
+        return number * number;
+      });
+    }).then(function (data) {
+      console.log(data);
+    });
+
+This spawns a new process on a worker thread
+</section>
+
+<section class="slide">
+## Parallel.js p.3
+
+    p.map(function (number) {
+      return number * number;
+    }).then(function (data) {
+      console.log(data);
+    });
+
+This will spawn one worker for each array element in the data, or the supplied `maxWorkers` argument
+
+
+    var q = new Parallel([0, 1, 2, 3, 4, 5, 6]);
+    var fib = function (n) { return n < 2 ? 1 : fib(n - 1) + fib(n - 2); };
+    var log = function () { console.log(arguments); };
+
+    p.map(fib).then(log);
+</section>
+
+<section class="slide">
+## Parallel.js p.4
+
+    function factorial (n) {
+      return n < 2 ? 1 : n * factorial(n - 1);
+    }
+
+    p.require(factorial)
+
+    p.map(function (n) {
+      return Math.pow(10, n) / factorial(n);
+    }).reduce(function (data) {
+      return data[0] + data[1];
+    }).then(function (data) {
+      console.log(data);
+    });
 </section>
 
 <section class="slide">
